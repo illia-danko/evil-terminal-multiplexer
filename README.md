@@ -26,7 +26,7 @@ Then require it in your `~/.emacs` with:
 (require 'navigate)
 ```
 
-You also have to setup commands in your ``wezterm.lua`:
+You also have to setup commands in your `wezterm.lua`:
 
 ```lua
 local wezterm = require 'wezterm'

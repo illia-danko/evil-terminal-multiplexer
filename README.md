@@ -97,7 +97,7 @@ return config
 
 # References
 
-- https://github.com/wez/wezterm
+* https://github.com/wez/wezterm
 * https://github.com/keith/evil-tmux-navigator
 * https://github.com/wez/wezterm/discussions/995
 * https://github.com/aca/wezterm.nvim

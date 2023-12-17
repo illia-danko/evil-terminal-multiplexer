@@ -3,7 +3,7 @@
 ;; Author:   Keith Smiley <keithbsmiley@gmail.com>
 ;;           Illia Danko <illia@danko.ws>
 ;; Created:  December 17 2023
-;; Version:  0.2.0
+;; Version:  0.2.1
 ;; Keywords: wezterm, evil, vi, vim
 
 ;;; Commentary:

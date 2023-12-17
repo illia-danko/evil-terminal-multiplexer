@@ -1,15 +1,16 @@
-;;; navigate.el --- Seamlessly navigate between Emacs and tmux
+;;; navigate.el --- Seamlessly navigate between Emacs and WezTerm
 
 ;; Author:   Keith Smiley <keithbsmiley@gmail.com>
-;; Created:  April 25 2014
-;; Version:  0.1.5
-;; Keywords: tmux, evil, vi, vim
+;;           Illia Danko <illia@danko.ws>
+;; Created:  December 17 2023
+;; Version:  0.2.0
+;; Keywords: wezterm, evil, vi, vim
 
 ;;; Commentary:
 
-;; This package is inspired by vim-tmux-navigator.
+;; This package is inspired by evil-tmux-navigator.
 ;; It allows you to navigate splits in evil mode
-;; Along with tmux splits with the same commands
+;; Along with wezterm splits with the same commands
 ;; Include with:
 ;;
 ;;    (require 'navigate)
@@ -20,54 +21,45 @@
 (require 'evil)
 
 (defgroup navigate nil
-  "seamlessly navigate between Emacs and tmux"
+  "seamlessly navigate between Emacs and wezterm"
   :prefix "navigate-"
   :group 'evil)
 
-; Without unsetting C-h this is useless
+;; Without unsetting C-h this is useless
 (global-unset-key (kbd "C-h"))
 
-; This requires windmove commands
+;; This requires windmove commands
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
-(defun tmux-navigate (direction)
-  (let
-    ((cmd (concat "windmove-" direction)))
-      (condition-case nil
-          (funcall (read cmd))
-        (error
-          (tmux-command direction)))))
-
-(defun tmux-command (direction)
-  (shell-command-to-string
-    (concat "tmux select-pane -"
-      (tmux-direction direction))))
-
-(defun tmux-direction (direction)
-  (upcase
-    (substring direction 0 1)))
+(defun wezterm-command (direction)
+  (let ((pane-id (shell-command-to-string
+				  (concat "wezterm cli get-pane-direction "
+						  direction))))
+	(shell-command-to-string
+	 (concat "wezterm cli activate-pane --pane-id "
+			 pane-id))))
 
 (define-key evil-normal-state-map
             (kbd "C-h")
             (lambda ()
               (interactive)
-              (tmux-navigate "left")))
+              (wezterm-navigate "left")))
 (define-key evil-normal-state-map
             (kbd "C-j")
             (lambda ()
               (interactive)
-              (tmux-navigate "down")))
+              (wezterm-navigate "down")))
 (define-key evil-normal-state-map
             (kbd "C-k")
             (lambda ()
               (interactive)
-              (tmux-navigate "up")))
+              (wezterm-navigate "up")))
 (define-key evil-normal-state-map
             (kbd "C-l")
             (lambda ()
               (interactive)
-              (tmux-navigate "right")))
+              (wezterm-navigate "right")))
 
 (provide 'navigate)
 

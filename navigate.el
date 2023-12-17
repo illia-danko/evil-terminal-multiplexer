@@ -32,7 +32,7 @@
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
 
-(defun wezterm-command (direction)
+(defun wezterm-navigate (direction)
   (let ((pane-id (shell-command-to-string
 				  (concat "wezterm cli get-pane-direction "
 						  direction))))

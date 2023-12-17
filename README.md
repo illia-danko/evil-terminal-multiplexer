@@ -49,7 +49,7 @@ local code_to_escape_sequence = {
 local editor_prefix_title = "emacs"
 
 local move_around = function(window, pane, direction_wez, direction_nvim)
-   if pane:get_title():sub(-string.len(editor_prefix_title)) == editor_prefix_title then
+   if pane:get_title():sub(1, string.len(editor_prefix_title)) == editor_prefix_title then
 	  sequence = code_to_escape_sequence[direction_nvim]
 	  window:perform_action(wezterm.action{SendString=sequence}, pane)
    else

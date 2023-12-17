@@ -33,6 +33,14 @@
   (windmove-default-keybindings))
 
 (defun wezterm-navigate (direction)
+  (let
+      ((cmd (concat "windmove-" direction)))
+    (condition-case nil
+        (funcall (read cmd))
+      (error
+       (wezterm-command direction)))))
+
+(defun wezterm-command (direction)
   (let ((pane-id (shell-command-to-string
 				  (concat "wezterm cli get-pane-direction "
 						  direction))))

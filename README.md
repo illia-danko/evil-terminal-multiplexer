@@ -17,7 +17,7 @@ Via straight.el:
 
 ```lisp
 (straight-use-package
-   '(navigate :type git :host codeberg :repo "eli87/evil-wezterm-navigator"))
+   '(navigate :type git :host github :repo "illia-danko/evil-wezterm-navigator"))
 ```
 
 Then require it in your `~/.emacs` with:

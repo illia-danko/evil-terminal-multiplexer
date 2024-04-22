@@ -1,7 +1,7 @@
 ;;; navigate.el --- Seamlessly navigate between Emacs and WezTerm
 
 ;; Author:   Keith Smiley <keithbsmiley@gmail.com>
-;;           Illia Danko <illia@danko.ws>
+;;           Illia Danko <illia@danko.me>
 ;; Created:  December 17 2023
 ;; Version:  0.2.1
 ;; Keywords: wezterm, evil, vi, vim

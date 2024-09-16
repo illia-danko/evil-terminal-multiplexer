@@ -1,15 +1,17 @@
-# evil-wezterm-navigator
+# evil-terminal-multiplexer
 
-For the Ctrl-{h,j,k,l} folks who used to use [vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) or similar...
+For the Ctrl-{h,j,k,l} folks who used to use
+[vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) or
+similar...
 
-This package aims to replace tmux workflow for [WezTerm](https://github.com/wez/wezterm) users. Since `wezterm` supports [multiplexing](https://wezfurlong.org/wezterm/multiplexing.html)
-natively, it seems unnecessary to use [Tmux](https://github.com/tmux/tmux) instead. The only missing part is a dedicated plugin
-which allows switching between editor's windows and `wezterm` panes seamlessly.
+This package aims to envelop both [WezTerm](https://github.com/wez/wezterm) and
+[Tmux](https://github.com/tmux/tmux) into the single navigate and resize workflow.
 
 # Dependencies
 
-* Emacs
+- Emacs
 - evil
+- [WezTerm](https://github.com/wez/wezterm) or [Tmux](https://github.com/tmux/tmux)
 
 # Installation and configuration
 
@@ -17,83 +19,87 @@ Via straight.el:
 
 ```lisp
 (straight-use-package
-   '(navigate :type git :host github :repo "illia-danko/evil-wezterm-navigator"))
+   '(etm :type git :host github :repo "illia-danko/evil-terminal-multiplexer"))
 ```
 
 Then require it in your `~/.emacs` with:
 
 ```lisp
-(require 'navigate)
+(require 'etm)
 ```
 
-You also have to setup commands in your `wezterm.lua`:
+# Tmux config
+
+```
+is_editor="ps -o state= -o comm= -t '#{pane_tty}' \
+    | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|nvim)(diff)?$|emacs.*$'"
+
+# Bindings.
+bind -n C-h if-shell "$is_editor" "send-keys C-h" "select-pane -L"
+bind -n C-l if-shell "$is_editor" "send-keys C-l" "select-pane -R"
+bind -n C-j if-shell "$is_editor" "send-keys C-j" "select-pane -D"
+bind -n C-k if-shell "$is_editor" "send-keys C-k" "select-pane -U"
+```
+
+# WezTerm config
 
 ```lua
-local wezterm = require 'wezterm'
+-- NOTE: This config implies resizing panes usage. However this is not supported yet.
+
+local wezterm = require("wezterm")
 
 local config = {}
 
 if wezterm.config_builder then
-   config = wezterm.config_builder()
+  config = wezterm.config_builder()
 end
 
--- Tmux like Ctrl-{h,j,k,l} navigation.
+local function is_editor(pane)
+  local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
+  return process_name == 'nvim' or process_name == 'vim' or string.find(process_name, 'emacs')
+end
 
-local code_to_escape_sequence = {
-   ["h"] = "\x08",
-   ["j"] = "\x0a",
-   ["k"] = "\x0b",
-   ["l"] = "\x0c",
+local direction_keys = {
+  h = 'Left',
+  j = 'Down',
+  k = 'Up',
+  l = 'Right',
 }
 
-local editor_prefix_title = "emacs"
-
-local move_around = function(window, pane, direction_wez, direction_nvim)
-   if pane:get_title():sub(1, string.len(editor_prefix_title)) == editor_prefix_title then
-	  sequence = code_to_escape_sequence[direction_nvim]
-	  window:perform_action(wezterm.action{SendString=sequence}, pane)
-   else
-	  window:perform_action(wezterm.action{ActivatePaneDirection=direction_wez}, pane)
-   end
+local function editor_nav_key(resize_or_move, key)
+  return {
+    key = key,
+    mods = resize_or_move == 'resize' and 'META' or 'CTRL',
+    action = wezterm.action_callback(function(win, pane)
+      if is_editor(pane) then
+        win:perform_action({
+          SendKey = { key = key, mods = resize_or_move == 'resize' and 'META' or 'CTRL' },
+        }, pane)
+      else
+        if resize_or_move == 'resize' then
+          win:perform_action({ AdjustPaneSize = { direction_keys[key], 3 } }, pane)
+        else
+          win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
+        end
+      end
+    end),
+  }
 end
 
-wezterm.on("move-left", function(window, pane) move_around(window, pane, "Left", "h") end)
-wezterm.on("move-right", function(window, pane) move_around(window, pane, "Right", "l") end)
-wezterm.on("move-up", function(window, pane) move_around(window, pane, "Up", "k") end)
-wezterm.on("move-down", function(window, pane) move_around(window, pane, "Down", "j") end)
-
--- Use Ctrl+Space as a prefix key.
-config.leader = { key="Space", mods="CTRL" }
 config.keys = {
-   { key = "Space", mods = "LEADER|CTRL",  action=wezterm.action{SendString="\x01"}},
-   { key = "\\",mods = "LEADER",           action=wezterm.action{SplitHorizontal={domain="CurrentPaneDomain"}}},
-   { key = "\"", mods = "LEADER|SHIFT",    action=wezterm.action{SplitVertical={domain="CurrentPaneDomain"}}},
-   { key = "%", mods = "LEADER|SHIFT",     action=wezterm.action{SplitHorizontal={domain="CurrentPaneDomain"}}},
-   { key = "z", mods = "LEADER",           action="TogglePaneZoomState" },
-   { key = "c", mods = "LEADER",           action=wezterm.action{SpawnTab="CurrentPaneDomain"}},
-   { key = "h", mods = "CTRL",             action=wezterm.action{EmitEvent="move-left"}},
-   { key = "j", mods = "CTRL",             action=wezterm.action{EmitEvent="move-down"}},
-   { key = "k", mods = "CTRL",             action=wezterm.action{EmitEvent="move-up"}},
-   { key = "l", mods = "CTRL",             action=wezterm.action{EmitEvent="move-right"}},
-   { key = "H", mods = "LEADER|SHIFT",     action=wezterm.action{AdjustPaneSize={"Left", 5}}},
-   { key = "J", mods = "LEADER|SHIFT",     action=wezterm.action{AdjustPaneSize={"Down", 5}}},
-   { key = "K", mods = "LEADER|SHIFT",     action=wezterm.action{AdjustPaneSize={"Up", 5}}},
-   { key = "L", mods = "LEADER|SHIFT",     action=wezterm.action{AdjustPaneSize={"Right", 5}}},
-   { key = "1", mods = "LEADER",           action=wezterm.action{ActivateTab=0}},
-   { key = "2", mods = "LEADER",           action=wezterm.action{ActivateTab=1}},
-   { key = "3", mods = "LEADER",           action=wezterm.action{ActivateTab=2}},
-   { key = "4", mods = "LEADER",           action=wezterm.action{ActivateTab=3}},
-   { key = "5", mods = "LEADER",           action=wezterm.action{ActivateTab=4}},
-   { key = "6", mods = "LEADER",           action=wezterm.action{ActivateTab=5}},
-   { key = "7", mods = "LEADER",           action=wezterm.action{ActivateTab=6}},
-   { key = "8", mods = "LEADER",           action=wezterm.action{ActivateTab=7}},
-   { key = "9", mods = "LEADER",           action=wezterm.action{ActivateTab=8}},
-   { key = "x", mods = "LEADER",           action=wezterm.action{CloseCurrentPane={confirm=false}}},
-   { key = "[", mods="LEADER",             action="ActivateCopyMode"},
-}
+  editor_nav_key('move', 'h'),
+  editor_nav_key('move', 'j'),
+  editor_nav_key('move', 'k'),
+  editor_nav_key('move', 'l'),
 
-return config
+  ---- resize panes
+  -- editor_nav_key('resize', 'h'),
+  -- editor_nav_key('resize', 'j'),
+  -- editor_nav_key('resize', 'k'),
+  -- editor_nav_key('resize', 'l'),
+}
 ```
+
 
 # References
 
@@ -102,3 +108,4 @@ return config
 * https://github.com/wez/wezterm/discussions/995
 * https://github.com/aca/wezterm.nvim
 * https://github.com/christoomey/vim-tmux-navigator
+* https://github.com/mrjones2014/smart-splits.nvim

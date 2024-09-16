@@ -1,11 +1,9 @@
 # evil-terminal-multiplexer
 
-For the Ctrl-{h,j,k,l} folks who used to use
-[vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) or
-similar...
+For the Ctrl-{h,j,k,l} folks who used to use [vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) or similar...
 
-This package aims to envelop both [WezTerm](https://github.com/wez/wezterm) and
-[Tmux](https://github.com/tmux/tmux) into the single navigate and resize workflow.
+This package aims to envelop both [WezTerm](https://github.com/wez/wezterm) and [Tmux](https://github.com/tmux/tmux) into the single navigation
+and resize workflow.
 
 # Dependencies
 

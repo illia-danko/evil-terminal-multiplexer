@@ -109,3 +109,7 @@ config.keys = {
 * https://github.com/aca/wezterm.nvim
 * https://github.com/christoomey/vim-tmux-navigator
 * https://github.com/mrjones2014/smart-splits.nvim
+
+# License
+
+MIT

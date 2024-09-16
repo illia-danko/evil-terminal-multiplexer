@@ -1,8 +1,8 @@
-;;; etm.el --- Seamlessly navigate between Emacs and a terminal multiplexer
+;;; etm.el --- Seamlessly navigate between Emacs and your favorite terminal multiplexer
 
 ;; Author:   Keith Smiley <keithbsmiley@gmail.com>
 ;;           Illia Danko <illia@danko.me>
-;; Created:  December 17 2023
+;; Created:  September 2024
 ;; Version:  0.2.1
 ;; Keywords: wezterm, tmux, evil, vi, vim
 
